@@ -565,7 +565,7 @@
     <div class="relic" id="relic">
       <div class="halo" id="halo"></div>
       <div class="ring" id="ring"></div>
-      <img id="hero" src="covers/hard-fiction.jpg" alt="Hard Fiction" />
+      <img id="hero" src="covers/sigil.jpg" alt="Rite I" />
       <svg class="cracks" id="cracks" viewBox="0 0 200 200" data-stage="0" aria-hidden="true">
         <g class="stg" data-n="1">
           <path d="M102 18 L108 46 L96 70 L112 98"/>
@@ -585,14 +585,14 @@
       </svg>
     </div>
     <div class="vein" id="vein" aria-label="Veine des 17 runes"></div>
-    <p class="hint" id="hint">TOUCHEZ LE SCEAU · 4 FRAPPES</p>
+    <p class="hint" id="hint">RÉVÉLATION · 01/10 00:00</p>
     <p class="quote" id="quote">
-      « La fiction est un diner où les morts paient l’addition. »
-      <cite>— HARD FICTION</cite>
+      « Le sceau attend. »
+      <cite>— RITE I</cite>
     </p>
 
     <div class="actions">
-      <button class="plate primary" id="unlock">Déverrouiller le rituel · 4 frappes</button>
+      <button class="plate primary" id="unlock" hidden>Déverrouiller le rituel · 4 frappes</button>
       <div class="links" id="links" hidden>
         <a class="plate" href="https://open.spotify.com" target="_blank" rel="noopener">Spotify</a>
         <a class="plate" href="https://music.apple.com" target="_blank" rel="noopener">Apple Music</a>
@@ -607,25 +607,28 @@
 
   <script>
     const RITES = [
-      { id: "ritual-drop", title: "Ritual Drop", cover: "covers/ritual-drop.jpg", state: "live",
-        quote: "Le premier sceau s’ouvre sans bruit." },
-      { id: "chestbreaker", title: "Chestbreaker", cover: "covers/chestbreaker.jpg", state: "live",
-        quote: "La cage thoracique est un temple trop étroit." },
-      { id: "ashtray", title: "Ashtray", cover: "covers/ashtray.jpg", state: "live",
-        quote: "On écrase le jour dans le même plat." },
-      { id: "squelch-pit", title: "Squelch Pit", cover: "covers/squelch-pit.jpg", state: "live",
-        quote: "Ce qui bout sous la terre n’a pas de nom propre." },
-      { id: "lm", title: "L&M", cover: "covers/lm.jpg", state: "live",
+      { id: "hard-park", title: "Hard Park", cover: "covers/sigil.jpg", state: "sealed",
+        dropAt: Date.parse("2026-10-01T00:00:00+02:00"),
+        quote: "Le sceau attend.", current: true },
+      { id: "lm", title: "L&M", cover: "covers/lm.jpg", state: "sealed",
+        dropAt: Date.parse("2026-10-02T00:00:00+02:00"),
         quote: "Le lait refroidit. La ville, non." },
-      { id: "root-canal", title: "Root Canal", cover: "covers/root-canal.jpg", state: "live",
+      { id: "ritual-drop", title: "Ritual Drop", cover: "covers/ritual-drop.jpg", state: "sealed",
+        quote: "Le premier sceau s’ouvre sans bruit." },
+      { id: "chestbreaker", title: "Chestbreaker", cover: "covers/chestbreaker.jpg", state: "sealed",
+        quote: "La cage thoracique est un temple trop étroit." },
+      { id: "ashtray", title: "Ashtray", cover: "covers/ashtray.jpg", state: "sealed",
+        quote: "On écrase le jour dans le même plat." },
+      { id: "squelch-pit", title: "Squelch Pit", cover: "covers/squelch-pit.jpg", state: "sealed",
+        quote: "Ce qui bout sous la terre n’a pas de nom propre." },
+      { id: "root-canal", title: "Root Canal", cover: "covers/root-canal.jpg", state: "sealed",
         quote: "On soigne la racine en réveillant la foudre." },
-      { id: "whispering-wood", title: "Whispering Wood", cover: "covers/whispering-wood.jpg", state: "live",
+      { id: "whispering-wood", title: "Whispering Wood", cover: "covers/whispering-wood.jpg", state: "sealed",
         quote: "Le bois parle plus bas que le kick." },
-      { id: "rolling-temple", title: "Rolling Temple", cover: "covers/rolling-temple.jpg", state: "live",
+      { id: "rolling-temple", title: "Rolling Temple", cover: "covers/rolling-temple.jpg", state: "sealed",
         quote: "Le temple avance. On n’entre pas : on est pris." },
-      { id: "hard-fiction", title: "Hard Fiction", cover: "covers/hard-fiction.jpg", state: "ember",
-        quote: "La fiction est un diner où les morts paient l’addition.", current: true },
-      { id: "w10", title: "Rite X", cover: "covers/sigil.jpg", state: "sealed" },
+      { id: "hard-fiction", title: "Hard Fiction", cover: "covers/hard-fiction.jpg", state: "sealed",
+        quote: "La fiction est un diner où les morts paient l’addition." },
       { id: "w11", title: "Rite XI", cover: "covers/sigil.jpg", state: "sealed" },
       { id: "w12", title: "Rite XII", cover: "covers/sigil.jpg", state: "sealed" },
       { id: "w13", title: "Rite XIII", cover: "covers/sigil.jpg", state: "sealed" },
@@ -648,8 +651,8 @@
     const wavePath = $("wavePath");
     const bp = $("bp");
 
-    let current = RITES.find(r => r.current) || RITES[8];
-    const STORE = "wild-ohm-unlocks";
+    let current = RITES.find(r => r.current) || RITES[0];
+    const STORE = "wild-ohm-unlocks-v2";
     let unlocked = {};
     try { unlocked = JSON.parse(localStorage.getItem(STORE) || "{}") || {}; } catch (e) { unlocked = {}; }
     function saveUnlocks() {
@@ -658,6 +661,7 @@
 
     function riteState(r) {
       if (unlocked[r.id]) return "live";
+      if (r.dropAt && Date.now() >= r.dropAt) return "ember";
       return r.state || "sealed";
     }
     function setCrack(n) {
@@ -775,7 +779,10 @@
         : "radial-gradient(circle, rgba(155,92,255,.4), rgba(232,163,23,.08) 42%, transparent 68%)";
       if (open) hint.textContent = "RITE OUVERT";
       else if (canUnlock) hint.textContent = "TOUCHEZ LE SCEAU · 4 FRAPPES";
-      else hint.textContent = "CE RITE N’A PAS ENCORE LIEU";
+      else if (r.dropAt) {
+        const left = r.dropAt - Date.now();
+        hint.textContent = left > 0 ? `RÉVÉLATION  ${fmtEta(left)}` : "TOUCHEZ LE SCEAU · 4 FRAPPES";
+      } else hint.textContent = "CE RITE N’A PAS ENCORE LIEU";
     }
 
     function select(id) {
